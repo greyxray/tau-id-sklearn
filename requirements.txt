@@ -1,0 +1,34 @@
+cd ml-projects
+~/ml-projects% python -V 
+Python 2.6.6
+#IN DESY
+#~/ml-projects%  module load python/2.7                                     
+~/ml-projects% python -V              
+Python 2.7.5
+
+## FOR LXPLUS before setting the env do
+	export PATH="/afs/cern.ch/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/bin/:$PATH"
+	export LD_LIBRARY_PATH="/afs/cern.ch/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/lib:$LD_LIBRARY_PATH"
+	#export PYTHONPATH="/afs/cern.ch/sw/lcg/external/pyanalysis/1.4_python2.7/x86_64-slc6-gcc48-opt/lib/python2.7/site-packages:$LD_LIBRARY_PATH"
+
+	python setup.py install --prefix=/afs/cern.ch/user/o/ohlushch/ml-projects/my-numpy/INSTALL/
+	export PYTHONPATH="/afs/cern.ch/user/o/ohlushch/ml-projects/my-numpy/INSTALL//lib/python2.7/site-packages:$PYTHONPATH"
+	# see http://www.graverini.net/elena/computing/physics-software/pyroot-lxplus/
+	#https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2fgroup%2froottalk%2fLists%2fArchive%2fPyroot%20module%20at%20lxplus&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
+# virtualenv -p `which python` .env
+# will ensure python 2.7.3
+
+~/ml-projects%  virtualenv .env       
+
+  source .env/bin/activate
+ 
+which root
+ python -c 'import ROOT'
+
+ pip install pip --upgrade
+pip install scipy
+ pip install numpy
+ pip install sklearn
+ pip install --user root_numpy
+
+ 
