@@ -21,6 +21,31 @@ from root_numpy import root2array, root2rec
 
 def trainVars():
     return [
+        'TMath::Log(TMath::Max(1., recTauPt))',
+        'TMath::Abs(recTauEta)',
+        'TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))',
+        'TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))',
+        'TMath::Log(TMath::Max(1.e-2, puCorrPtSum))',
+        'TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))',
+        'recTauDecayMode',
+        'TMath::Min(30., recTauNphoton)',
+        'TMath::Min(0.5, recTauPtWeightedDetaStrip)',
+        'TMath::Min(0.5, recTauPtWeightedDphiStrip)',
+        'TMath::Min(0.5, recTauPtWeightedDrSignal)',
+        'TMath::Min(0.5, recTauPtWeightedDrIsolation)',
+        'TMath::Min(100., recTauLeadingTrackChi2)',
+        'TMath::Min(1., recTauEratio)',
+        'TMath::Sign(+1., recImpactParam)',
+        'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))',
+        'TMath::Min(10., TMath::Abs(recImpactParamSign))',
+        'TMath::Sign(+1., recImpactParam3D)',
+        'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))',
+        'TMath::Min(10., TMath::Abs(recImpactParamSign3D))',
+        'hasRecDecayVertex',
+        'TMath::Sqrt(recDecayDistMag)',
+        'TMath::Min(10., recDecayDistSign)'
+    ]
+'''
     'recTauEta', 'recTauPt', 'recTauDecayMode', 
     'leadPFChargedHadrCandPt', 'tauIsoDeltaR05PtThresholdsLoose3HitsChargedIsoPtSum', 'tauIsoDeltaR05PtThresholdsLoose3HitsNeutralIsoPtSumWeight', 'tauIsoDeltaR05PtThresholdsLoose3HitsFootprintCorrection', 'tauIsoDeltaR05PtThresholdsLoose3HitsPhotonPtSumOutsideSignalCone', 
     'recImpactParam', 
@@ -46,8 +71,32 @@ def trainVars():
     'recTauPtWeightedDrIsolation', 'recTauNphoton', 
     'recTauEratio'
     #, 'recTauLeadingTrackChi2'
-    ]
-
+'''
+'''
+'TMath::Log(TMath::Max(1., recTauPt))/F',
+            'TMath::Abs(recTauEta)/F',
+            'TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))/F',
+            'TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))/F',
+            'TMath::Log(TMath::Max(1.e-2, puCorrPtSum))/F',
+            'TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))/F',
+            'recTauDecayMode/I',
+            'TMath::Min(30., recTauNphoton)/F',
+            'TMath::Min(0.5, recTauPtWeightedDetaStrip)/F',
+            'TMath::Min(0.5, recTauPtWeightedDphiStrip)/F',
+            'TMath::Min(0.5, recTauPtWeightedDrSignal)/F',
+            'TMath::Min(0.5, recTauPtWeightedDrIsolation)/F',
+            'TMath::Min(100., recTauLeadingTrackChi2)/F',
+            'TMath::Min(1., recTauEratio)/F',
+            'TMath::Sign(+1., recImpactParam)/F',
+            'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))/F',
+            'TMath::Min(10., TMath::Abs(recImpactParamSign))/F',
+            'TMath::Sign(+1., recImpactParam3D)/F',
+            'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))/F',
+            'TMath::Min(10., TMath::Abs(recImpactParamSign3D))/F',
+            'hasRecDecayVertex/I',
+            'TMath::Sqrt(recDecayDistMag)/F',
+            'TMath::Min(10., recDecayDistSign)/F'
+'''
 # calculates RO
 
 def trainRandomForest(training_data, target, weights):
@@ -134,8 +183,8 @@ def readFiles():
     print 'Reading files...'
 
 
-    weightsS = root2rec('data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_signal.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
-    weightsB = root2rec('data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_background.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
+    weightsS = root2rec('/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_signal.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
+    weightsB = root2rec('/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_background.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
 
     nS = len(weightsS)
     nB = len(weightsB)
@@ -145,8 +194,8 @@ def readFiles():
 
     del weightsS, weightsB
 
-    arrSB = root2array(['data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_signal.root', 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_background.root'], 'reweightedTauIdMVATrainingNtuple', trainVars())
-
+    #arrSB = root2array(['data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_signal.root', 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_background.root'], 'reweightedTauIdMVATrainingNtuple', trainVars())
+    arrSB = root2array(['/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_signal.root','/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_background.root'], 'reweightedTauIdMVATrainingNtuple', trainVars())
     # Need a matrix-like array instead of a 1-D array of lists for sklearn
     arrSB = (np.asarray([arrSB[var] for var in trainVars()])).transpose()
 
