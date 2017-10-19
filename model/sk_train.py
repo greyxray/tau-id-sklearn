@@ -33,9 +33,14 @@ def trainGBRT(training_data, target, weights, learning_rate=0.01, max_depth=6, n
 	 # loss='deviance', verbose=1, subsample=subSample)
 	return train(clf, training_data, target, weights)
 
+class TrainingResult(object):
+  def __init__(self, clf, efficiency_res):
+     self.clf = clf
+     self.efficiency_res = efficiency_res
+
 def train(clf, training_data, target, weights):
 	print clf
-
+	efficiency_res = []
 	sumWeightsSignal = np.sum(weights * target)
 	sumWeightsBackground = sum(weights * (1 - target))
 
@@ -54,7 +59,7 @@ def train(clf, training_data, target, weights):
 	print "len(kf):", len(kf)
 	for trainIndices, testIndices in kf:
 		print 'Starting fold'
-
+		efficiency_res.append([])
 		d_train = training_data[trainIndices]
 		d_test = training_data[testIndices]
 
@@ -83,6 +88,7 @@ def train(clf, training_data, target, weights):
 
 		for eff in effs:
 			print 'Fake rate at signal eff', eff, fpr[np.argmax(tpr>eff)]
+			efficiency_res[-1].append(fpr[np.argmax(tpr>eff)])
 		print "break"
 		break
 
@@ -99,7 +105,7 @@ def train(clf, training_data, target, weights):
 	for i, imp in enumerate(clf.feature_importances_):
 		print imp, varList[i] if i<len(varList) else 'N/A'
 
-	return clf
+	return TrainingResult(clf, efficiency_res)#(clf, efficiency_res)
 
 if __name__ == '__main__':
 
@@ -107,7 +113,7 @@ if __name__ == '__main__':
 	doTrain = True
 
 	print 'Read training and test files...'
-	training, weights, targets = reads_data(0, 100, 0, 1000)
+	training, weights, targets = reads_data(0, 10000, 0, 100000)
 
 	print 'Sizes'
 	print training.nbytes, weights.nbytes, targets.nbytes

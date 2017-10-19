@@ -1,34 +1,72 @@
-cd ml-projects
-~/ml-projects% python -V 
-Python 2.6.6
-#IN DESY
-#~/ml-projects%  module load python/2.7                                     
-~/ml-projects% python -V              
-Python 2.7.5
+for 10000 sg and 100000 bg:
 
-## FOR LXPLUS before setting the env do
-	export PATH="/afs/cern.ch/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/bin/:$PATH"
-	export LD_LIBRARY_PATH="/afs/cern.ch/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/lib:$LD_LIBRARY_PATH"
-	#export PYTHONPATH="/afs/cern.ch/sw/lcg/external/pyanalysis/1.4_python2.7/x86_64-slc6-gcc48-opt/lib/python2.7/site-packages:$LD_LIBRARY_PATH"
 
-	python setup.py install --prefix=/afs/cern.ch/user/o/ohlushch/ml-projects/my-numpy/INSTALL/
-	export PYTHONPATH="/afs/cern.ch/user/o/ohlushch/ml-projects/my-numpy/INSTALL//lib/python2.7/site-packages:$PYTHONPATH"
-	# see http://www.graverini.net/elena/computing/physics-software/pyroot-lxplus/
-	#https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2fgroup%2froottalk%2fLists%2fArchive%2fPyroot%20module%20at%20lxplus&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
-# virtualenv -p `which python` .env
-# will ensure python 2.7.3
+Starting fold
+      Iter       Train Loss      OOB Improve   Remaining Time   
+         1           0.5995           0.0091            2.24m   
+         2           0.5963           0.0085            2.23m   
+         3           0.5870           0.0070            2.20m   
+         4           0.5718           0.0077            2.20m   
+         5           0.5646           0.0074            2.19m   
+         6           0.5648           0.0070            2.17m   
+         7           0.5639           0.0063            2.18m   
+         8           0.5509           0.0064            2.17m   
+         9           0.5440           0.0061            2.16m   
+        10           0.5396           0.0058            2.16m   
+        20           0.4846           0.0040            2.13m   
+        30           0.4502           0.0031            2.11m   
+        40           0.4258           0.0025            2.10m   
+        50           0.4005           0.0019            2.07m   
+        60           0.3807           0.0016            2.05m   
+        70           0.3579           0.0014            2.02m   
+        80           0.3452           0.0012            2.00m   
+        90           0.3319           0.0011            1.97m   
+       100           0.3305           0.0009            1.95m   
+       200           0.2622           0.0002            1.74m   
+       300           0.2404           0.0001            1.51m   
+       400           0.2268           0.0000            1.28m   
+       500           0.2154           0.0000            1.06m   
+       600           0.2071          -0.0000           50.54s
+       700           0.2036          -0.0000           37.66s   
+       800           0.1925          -0.0000           25.00s   
+       900           0.1885          -0.0000           12.45s   
+      1000           0.1859          -0.0000            0.00s   
 
-~/ml-projects%  virtualenv .env       
 
-  source .env/bin/activate
- 
-which root
- python -c 'import ROOT'
+Fake rate at signal eff 0.2 0.00223910435826
+Fake rate at signal eff 0.3 0.00437824870052
+Fake rate at signal eff 0.4 0.00791683326669
+Fake rate at signal eff 0.5 0.0127548980408
+Fake rate at signal eff 0.6 0.0210115953619
+Fake rate at signal eff 0.7 0.03168732507
+Fake rate at signal eff 0.8 0.0534986005598
+Fake rate at signal eff 0.9 0.104118352659
 
- pip install pip --upgrade
-pip install scipy
- pip install numpy
- pip install sklearn
- pip install --user root_numpy
+arr = [0.00223910435826, 0.00437824870052, 0.00791683326669, 0.0127548980408, 0.0210115953619, 0.03168732507, 0.0534986005598, 0.104118352659]
 
- 
+
+Feature importances:
+
+0.0602514923569 TMath::Log(TMath::Max(1., recTauPt))
+0.0588103620687 TMath::Abs(recTauEta)
+0.177763856409 TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))   
+0.0819086634905 TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))  
+0.0474100873075 TMath::Log(TMath::Max(1.e-2, puCorrPtSum))
+0.0539892836674 TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))
+0.0149789657436 recTauDecayMode
+0.0412633911989 TMath::Min(30., recTauNphoton)
+0.0427472430416 TMath::Min(0.5, recTauPtWeightedDetaStrip)
+0.0337837185503 TMath::Min(0.5, recTauPtWeightedDphiStrip)
+0.0439008797232 TMath::Min(0.5, recTauPtWeightedDrSignal)
+0.0370518450785 TMath::Min(0.5, recTauPtWeightedDrIsolation)
+0.0392569748032 TMath::Min(100., recTauLeadingTrackChi2)
+0.0367602864918 TMath::Min(1., recTauEratio)
+0.00310471309208 TMath::Sign(+1., recImpactParam)
+0.0352669912186 TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))
+0.0330979890573 TMath::Min(10., TMath::Abs(recImpactParamSign)) 
+0.0089139071709 TMath::Sign(+1., recImpactParam3D)
+0.056199708476 TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))
+0.0441680960856 TMath::Min(10., TMath::Abs(recImpactParamSign3D))
+0.00739618571048 hasRecDecayVertex
+0.0201676168552 TMath::Sqrt(recDecayDistMag)
+0.0218077424031 TMath::Min(10., recDecayDistSign)
