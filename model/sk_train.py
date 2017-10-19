@@ -18,86 +18,7 @@ from sklearn.metrics import roc_curve
 from sklearn.externals import joblib
 
 from root_numpy import root2array, root2rec
-
-def trainVars():
-    return [
-        'TMath::Log(TMath::Max(1., recTauPt))',
-        'TMath::Abs(recTauEta)',
-        'TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))',
-        'TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))',
-        'TMath::Log(TMath::Max(1.e-2, puCorrPtSum))',
-        'TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))',
-        'recTauDecayMode',
-        'TMath::Min(30., recTauNphoton)',
-        'TMath::Min(0.5, recTauPtWeightedDetaStrip)',
-        'TMath::Min(0.5, recTauPtWeightedDphiStrip)',
-        'TMath::Min(0.5, recTauPtWeightedDrSignal)',
-        'TMath::Min(0.5, recTauPtWeightedDrIsolation)',
-        'TMath::Min(100., recTauLeadingTrackChi2)',
-        'TMath::Min(1., recTauEratio)',
-        'TMath::Sign(+1., recImpactParam)',
-        'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))',
-        'TMath::Min(10., TMath::Abs(recImpactParamSign))',
-        'TMath::Sign(+1., recImpactParam3D)',
-        'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))',
-        'TMath::Min(10., TMath::Abs(recImpactParamSign3D))',
-        'hasRecDecayVertex',
-        'TMath::Sqrt(recDecayDistMag)',
-        'TMath::Min(10., recDecayDistSign)'
-    ]
-'''
-    'recTauEta', 'recTauPt', 'recTauDecayMode', 
-    'leadPFChargedHadrCandPt', 'tauIsoDeltaR05PtThresholdsLoose3HitsChargedIsoPtSum', 'tauIsoDeltaR05PtThresholdsLoose3HitsNeutralIsoPtSumWeight', 'tauIsoDeltaR05PtThresholdsLoose3HitsFootprintCorrection', 'tauIsoDeltaR05PtThresholdsLoose3HitsPhotonPtSumOutsideSignalCone', 
-    'recImpactParam', 
-    'recImpactParamSign', 
-    'recImpactParam3D', 
-    'recImpactParamSign3D',
-    #'recImpactParamTk2', 'recImpactParamSignTk2', 
-    'recImpactParam3DTk2', 'recImpactParamSign3DTk2', 
-    #'recImpactParamTk3', 'recImpactParamSignTk3', 
-    'recImpactParam3DTk3', 'recImpactParamSign3DTk3', 'recDecayLengthTk1', 'recDecayLengthSignTk1', 'recDecayLengthTk2', 
-    # 'recDecayLengthSignTk2', 
-    'recDecayLengthTk3', 
-    # 'recDecayLengthSignTk3', 
-    'recDecayDist2D', 'recDecayDistSign2D', 
-    #'recChi2DiffEvtVertex', 
-    #'hasRecDecayVertex', 
-    'recDecayVertexChi2', 'recDecayDistMag', 
-    #'recDecayDistSign', 
-    # 'numOfflinePrimaryVertices', 
-    'recTauPtWeightedDetaStrip', 
-    #'recTauPtWeightedDphiStrip', 
-    #'recTauPtWeightedDrSignal', 
-    'recTauPtWeightedDrIsolation', 'recTauNphoton', 
-    'recTauEratio'
-    #, 'recTauLeadingTrackChi2'
-'''
-'''
-'TMath::Log(TMath::Max(1., recTauPt))/F',
-            'TMath::Abs(recTauEta)/F',
-            'TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))/F',
-            'TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))/F',
-            'TMath::Log(TMath::Max(1.e-2, puCorrPtSum))/F',
-            'TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))/F',
-            'recTauDecayMode/I',
-            'TMath::Min(30., recTauNphoton)/F',
-            'TMath::Min(0.5, recTauPtWeightedDetaStrip)/F',
-            'TMath::Min(0.5, recTauPtWeightedDphiStrip)/F',
-            'TMath::Min(0.5, recTauPtWeightedDrSignal)/F',
-            'TMath::Min(0.5, recTauPtWeightedDrIsolation)/F',
-            'TMath::Min(100., recTauLeadingTrackChi2)/F',
-            'TMath::Min(1., recTauEratio)/F',
-            'TMath::Sign(+1., recImpactParam)/F',
-            'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))/F',
-            'TMath::Min(10., TMath::Abs(recImpactParamSign))/F',
-            'TMath::Sign(+1., recImpactParam3D)/F',
-            'TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))/F',
-            'TMath::Min(10., TMath::Abs(recImpactParamSign3D))/F',
-            'hasRecDecayVertex/I',
-            'TMath::Sqrt(recDecayDistMag)/F',
-            'TMath::Min(10., recDecayDistSign)/F'
-'''
-# calculates RO
+from reader import reads_data, trainVars
 
 def trainRandomForest(training_data, target, weights):
     clf = RandomForestClassifier(n_estimators=500, criterion='gini', max_depth=7, min_samples_split=2, min_samples_leaf=1, max_features='auto', bootstrap=True, oob_score=True, n_jobs=1, random_state=1, verbose=1, min_density=None, compute_importances=None)
@@ -111,7 +32,6 @@ def trainGBRT(training_data, target, weights, learning_rate=0.01, max_depth=6, n
     clf = GradientBoostingClassifier(n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, random_state=1, loss='deviance', verbose=1, subsample=subSample, max_features=0.4) #loss='exponential'/'deviance'
      # loss='deviance', verbose=1, subsample=subSample)
     return train(clf, training_data, target, weights)
-
 
 def train(clf, training_data, target, weights):
     print clf
@@ -127,12 +47,11 @@ def train(clf, training_data, target, weights):
     aveWeightBG = sumWeightsSignal/np.sum(1-target)
     print 'Average weight background', aveWeightBG
 
-    
     nCrossVal = 2
     kf = KFold(len(training_data), nCrossVal, shuffle=True, random_state=1)
 
     print 'Cross-validation:', nCrossVal, 'folds'
-
+    print "len(kf):", len(kf)
     for trainIndices, testIndices in kf:
         print 'Starting fold'
 
@@ -154,18 +73,21 @@ def train(clf, training_data, target, weights):
         print 'Produce scores'
         scores = clf.decision_function(d_test)
 
+        print 'Roc-curves'
         fpr, tpr, tresholds = roc_curve(t_test, scores, sample_weight=w_test)
 
+        print 'dump'
         joblib.dump((fpr, tpr, tresholds), 'roc_vals.pkl')
 
         effs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
         for eff in effs:
             print 'Fake rate at signal eff', eff, fpr[np.argmax(tpr>eff)]
-
+        print "break"
         break
-    
+
     # Can save with different features if necessary
+    print "Can save with different features if necessary"
     joblib.dump(clf, 'train/{name}_clf.pkl'.format(name=clf.__class__.__name__), compress=9)
 
     # if doCrossVal:
@@ -175,36 +97,8 @@ def train(clf, training_data, target, weights):
     varList = trainVars()
     for i, imp in enumerate(clf.feature_importances_):
         print imp, varList[i] if i<len(varList) else 'N/A'
-    
+
     return clf
-
-
-def readFiles():
-    print 'Reading files...'
-
-
-    weightsS = root2rec('/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_signal.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
-    weightsB = root2rec('/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_background.root', 'reweightedTauIdMVATrainingNtuple', ['evtWeight'])
-
-    nS = len(weightsS)
-    nB = len(weightsB)
-
-    fullWeight = np.concatenate((weightsS, weightsB))
-    fullWeight = fullWeight['evtWeight']
-
-    del weightsS, weightsB
-
-    #arrSB = root2array(['data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_signal.root', 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt18aPuWeightLTBDT3_background.root'], 'reweightedTauIdMVATrainingNtuple', trainVars())
-    arrSB = root2array(['/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_signal.root','/nfs/dust/cms/user/glusheno/TauIDMVATraining2016/Summer16_25ns_V1_allPhotonsCut/tauId_v3_0/trainfilesfinal_v1/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5_background.root'], 'reweightedTauIdMVATrainingNtuple', trainVars())
-    # Need a matrix-like array instead of a 1-D array of lists for sklearn
-    arrSB = (np.asarray([arrSB[var] for var in trainVars()])).transpose()
-
-    targets = np.concatenate((np.ones(nS),np.zeros(nB)))
-
-    print 'Done reading files.'
-
-    return arrSB, fullWeight, targets
-
 
 if __name__ == '__main__':
 
@@ -212,7 +106,7 @@ if __name__ == '__main__':
     doTrain = True
 
     print 'Read training and test files...'
-    training, weights, targets = readFiles()        
+    training, weights, targets = reads_data(0, 100, 0, 1000)
 
     print 'Sizes'
     print training.nbytes, weights.nbytes, targets.nbytes
@@ -228,7 +122,7 @@ if __name__ == '__main__':
             clf = trainRandomForest(training, targets, weights)
         else:
             print 'ERROR: no valid classifier', classifier
-    
+
     # if doTest:
     #     print 'Loading classifier'
     #     if classifier == 'GBRT':
