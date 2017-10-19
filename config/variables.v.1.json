@@ -1,0 +1,27 @@
+{
+	"variables": [
+		"TMath::Log(TMath::Max(1., recTauPt))",
+		"TMath::Abs(recTauEta)",
+		"TMath::Log(TMath::Max(1.e-2, chargedIsoPtSum))",
+		"TMath::Log(TMath::Max(1.e-2, neutralIsoPtSum))",
+		"TMath::Log(TMath::Max(1.e-2, puCorrPtSum))",
+		"TMath::Log(TMath::Max(1.e-2, photonPtSumOutsideSignalCone))",
+		"recTauDecayMode",
+		"TMath::Min(30., recTauNphoton)",
+		"TMath::Min(0.5, recTauPtWeightedDetaStrip)",
+		"TMath::Min(0.5, recTauPtWeightedDphiStrip)",
+		"TMath::Min(0.5, recTauPtWeightedDrSignal)",
+		"TMath::Min(0.5, recTauPtWeightedDrIsolation)",
+		"TMath::Min(100., recTauLeadingTrackChi2)",
+		"TMath::Min(1., recTauEratio)",
+		"TMath::Sign(+1., recImpactParam)",
+		"TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam))))",
+		"TMath::Min(10., TMath::Abs(recImpactParamSign))",
+		"TMath::Sign(+1., recImpactParam3D)",
+		"TMath::Sqrt(TMath::Abs(TMath::Min(1., TMath::Abs(recImpactParam3D))))",
+		"TMath::Min(10., TMath::Abs(recImpactParamSign3D))",
+		"hasRecDecayVertex",
+		"TMath::Sqrt(recDecayDistMag)",
+		"TMath::Min(10., recDecayDistSign)"
+	]
+}

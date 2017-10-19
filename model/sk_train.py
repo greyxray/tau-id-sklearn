@@ -16,9 +16,7 @@ from sklearn.metrics import roc_curve
 
 # For model I/O
 from sklearn.externals import joblib
-
-from root_numpy import root2array, root2rec
-from reader import reads_data, trainVars
+from reader import PlainReader as rd 
 
 def trainRandomForest(training_data, target, weights):
 	clf = RandomForestClassifier(n_estimators=500, criterion='gini', max_depth=7, min_samples_split=2, min_samples_leaf=1, max_features='auto', bootstrap=True, oob_score=True, n_jobs=1, random_state=1, verbose=1, min_density=None, compute_importances=None)
@@ -101,7 +99,7 @@ def train(clf, training_data, target, weights):
 	print 'Feature importances:'
 	print clf.feature_importances_
 
-	varList = trainVars()
+	varList = rd.trainVars
 	for i, imp in enumerate(clf.feature_importances_):
 		print imp, varList[i] if i<len(varList) else 'N/A'
 
@@ -113,7 +111,7 @@ if __name__ == '__main__':
 	doTrain = True
 
 	print 'Read training and test files...'
-	training, weights, targets = reads_data(0, 10000, 0, 100000)
+	training, weights, targets = rd.reads_data(0, 10000, 0, 100000)
 
 	print 'Sizes'
 	print training.nbytes, weights.nbytes, targets.nbytes
