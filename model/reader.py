@@ -13,14 +13,14 @@ class PlainReader(object):
 
 	@classmethod
 	def reads_data(klass, startS = None, stopS=None, startB = None, stopB=None,
-			filename = 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5',
+			filenameroot = 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5',
 			tree = 'reweightedTauIdMVATrainingNtuple'
 		):
 		print 'Reading files...'
 
 		# Read from files
-		sdata, sweights = klass._data_weights('_signal.root', startS, stopS, filename, tree)
-		bdata, bweights = klass._data_weights('_background.root', startB, stopB, filename, tree)
+		sdata, sweights = klass._data_weights('_signal.root', startS, stopS, filenameroot, tree)
+		bdata, bweights = klass._data_weights('_background.root', startB, stopB, filenameroot, tree)
 
 		# Join the data
 		data = np.concatenate((sdata, bdata)) # deprecated but faster would be hstack
@@ -43,10 +43,10 @@ class PlainReader(object):
 
 
 	@classmethod
-	def _data_weights(klass, cltype, start, stop, filename, tree):
+	def _data_weights(klass, cltype, start, stop, filenameroot, tree):
 		if stop and start == None: 
 			start = 0
 		# see: http://scikit-hep.org/root_numpy/reference/generated/root_numpy.root2rec.html
-		weights = root2array(filenames = filename + cltype, treename = tree , branches = ['evtWeight'], start = start, stop = stop).view()
-		data = root2array(filenames = filename + cltype, treename = tree , branches = klass.trainVars, start = start, stop = stop)
+		weights = root2array(filenames = filenameroot + cltype, treename = tree , branches = ['evtWeight'], start = start, stop = stop).view()
+		data = root2array(filenames = filenameroot + cltype, treename = tree , branches = klass.trainVars, start = start, stop = stop)
 		return data, weights
