@@ -32,9 +32,13 @@ def trainGBRT(training_data, target, weights, learning_rate=0.01, max_depth=6, n
 	return train(clf, training_data, target, weights)
 
 class TrainingResult(object):
-  def __init__(self, clf, efficiency_res):
-     self.clf = clf
-     self.efficiency_res = efficiency_res
+
+	def __init__(self, clf, efficiency_res):
+		self.clf = clf
+		self.efficiency_res = efficiency_res
+
+	def __str__(self):
+		return "TrainingResult:\n\tclf: {}\n\tefficiency_res:".format(self.clf is not None) + "{}".format(self.efficiency_res)
 
 def train(clf, training_data, target, weights):
 	print clf
