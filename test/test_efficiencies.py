@@ -55,12 +55,9 @@ class TestEfficiency(unittest.TestCase):
 				result = trainRandomForest(training, targets, weights)
 			else:
 				print 'ERROR: no valid classifier', classifier
-		if len(result.efficiency_res) > 0:
-			if len([i for i, j in zip(efficiency_nominal, result.efficiency_res[0]) if i - j > 0.000001]) == 0:
-				print "\n\n", "="*10,"\nThe first instance is the same as nominal"
-			else:
-				print "\n\n", "="*10,"\nNot identical. \n\tefficiency_nominal :\n", efficiency_nominal, "\n\tresult.efficiency_res :"
-				pp = pprint.PrettyPrinter(indent=4)
-				pp.pprint(result.efficiency_res)
-		else:
-			print "\n\n", "="*10,"\nno resulting efficiencies found"
+
+		try:
+		    for i, j in zip(efficiency_nominal, result.efficiency_res[0]):
+				self.assertEqual(round(i, 7), round(j, 7))
+		except:
+		    print "\n\n", "="*10,"\nno resulting efficiencies found"
