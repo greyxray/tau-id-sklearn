@@ -2,6 +2,7 @@
 # Requires root_numpy https://github.com/rootpy/root_numpy
 # Jan Steggemann 27 Aug 2015
 from os import path, makedirs
+import json
 import numpy as np
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -11,25 +12,12 @@ from sklearn.tree import DecisionTreeClassifier
 
 # from sklearn.cross_validation import train_test_split #cross_val_score
 from sklearn.cross_validation import KFold
-
 from sklearn.metrics import roc_curve
 
 # For model I/O
 from sklearn.externals import joblib
 from reader import PlainReader as rd 
 
-def trainRandomForest(training_data, target, weights):
-	clf = RandomForestClassifier(n_estimators=500, criterion='gini', max_depth=7, min_samples_split=2, min_samples_leaf=1, max_features='auto', bootstrap=True, oob_score=True, n_jobs=1, random_state=1, verbose=1, min_density=None, compute_importances=None)
-	return train(clf, training_data, target, weights)
-
-def trainAdaBoost(training_data, target, weights):
-	clf = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(compute_importances=None, criterion='gini', max_depth=6, max_features='auto', min_density=None, min_samples_leaf=2, min_samples_split=2, random_state=1, splitter='best'), n_estimators=5000, learning_rate=0.0025, algorithm='SAMME.R')
-	return train(clf, training_data, target, weights)
-
-def trainGBRT(training_data, target, weights, learning_rate=0.01, max_depth=6, n_estimators=1000, subSample=0.5):
-	clf = GradientBoostingClassifier(n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, random_state=1, loss='deviance', verbose=1, subsample=subSample, max_features=0.4) #loss='exponential'/'deviance'
-	 # loss='deviance', verbose=1, subsample=subSample)
-	return train(clf, training_data, target, weights)
 
 class TrainingResult(object):
 
@@ -40,106 +28,136 @@ class TrainingResult(object):
 	def __str__(self):
 		return "TrainingResult:\n\tclf: {}\n\tefficiency_res:".format(self.clf is not None) + "{}".format(self.efficiency_res)
 
-def train(clf, training_data, target, weights):
-	print clf
-	efficiency_res = []
-	sumWeightsSignal = np.sum(weights * target)
-	sumWeightsBackground = sum(weights * (1 - target))
+class Training(object):
 
-	print 'Sum weights signal', sumWeightsSignal
-	print 'Sum weights background', sumWeightsBackground
+	def __init__(self, name=None, training=None, weights=None, targets=None):
+		self.name = name
+		self.training = training
+		self.weights = weights
+		self.targets = targets
 
-	aveWeightSignal = sumWeightsSignal/np.sum(target)
-	print 'Average weight signal', aveWeightSignal
-	aveWeightBG = sumWeightsSignal/np.sum(1-target)
-	print 'Average weight background', aveWeightBG
+	@classmethod
+	def trainRandomForest(klass, training_data, target, weights):
+		clf = RandomForestClassifier(n_estimators=500, criterion='gini', max_depth=7, min_samples_split=2, min_samples_leaf=1, max_features='auto', bootstrap=True, oob_score=True, n_jobs=1, random_state=1, verbose=1, min_density=None, compute_importances=None)
+		return klass.train(clf, training_data, target, weights)
 
-	nCrossVal = 2
-	kf = KFold(len(training_data), nCrossVal, shuffle=True, random_state=1)
+	@classmethod
+	def trainAdaBoost(klass, training_data, target, weights):
+		clf = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(compute_importances=None, criterion='gini', max_depth=6, max_features='auto', min_density=None, min_samples_leaf=2, min_samples_split=2, random_state=1, splitter='best'), n_estimators=5000, learning_rate=0.0025, algorithm='SAMME.R')
+		return klass.train(clf, training_data, target, weights)
 
-	print 'Cross-validation:', nCrossVal, 'folds'
-	print "len(kf):", len(kf)
-	for trainIndices, testIndices in kf:
-		print 'Starting fold'
-		efficiency_res.append([])
-		d_train = training_data[trainIndices]
-		d_test = training_data[testIndices]
+	@classmethod
+	def trainGBRT(klass, training_data, target, weights, learning_rate=0.01, max_depth=6, n_estimators=1000, subSample=0.5):
+		clf = GradientBoostingClassifier(n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, random_state=1, loss='deviance', verbose=1, subsample=subSample, max_features=0.4) #loss='exponential'/'deviance'
+		 # loss='deviance', verbose=1, subsample=subSample)
+		return klass.train(clf, training_data, target, weights)
 
-		t_train = target[trainIndices]
-		t_test = target[testIndices]
+	@staticmethod
+	def train(clf, training_data, target, weights):
+		print clf
+		efficiency_res = []
+		sumWeightsSignal = np.sum(weights * target)
+		sumWeightsBackground = sum(weights * (1 - target))
 
-		w_train = weights[trainIndices]
-		w_test = weights[testIndices]
+		print 'Sum weights signal', sumWeightsSignal
+		print 'Sum weights background', sumWeightsBackground
 
-		del training_data, target, weights, trainIndices, testIndices, kf
+		aveWeightSignal = sumWeightsSignal/np.sum(target)
+		print 'Average weight signal', aveWeightSignal
+		aveWeightBG = sumWeightsSignal/np.sum(1-target)
+		print 'Average weight background', aveWeightBG
 
-		# import pdb; pdb.set_trace()
+		nCrossVal = 2
+		kf = KFold(len(training_data), nCrossVal, shuffle=True, random_state=1)
 
-		clf.fit(d_train, t_train, w_train)
+		print 'Cross-validation:', nCrossVal, 'folds'
+		print "len(kf):", len(kf)
+		for trainIndices, testIndices in kf:
+			print 'Starting fold'
+			efficiency_res.append([])
+			d_train = training_data[trainIndices]
+			d_test = training_data[testIndices]
 
-		print 'Produce scores'
-		scores = clf.decision_function(d_test)
+			t_train = target[trainIndices]
+			t_test = target[testIndices]
 
-		print 'Roc-curves'
-		fpr, tpr, tresholds = roc_curve(t_test, scores, sample_weight=w_test)
+			w_train = weights[trainIndices]
+			w_test = weights[testIndices]
 
-		print 'dump'
-		joblib.dump((fpr, tpr, tresholds), 'roc_vals.pkl')
+			del training_data, target, weights, trainIndices, testIndices, kf
 
-		effs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+			# import pdb; pdb.set_trace()
 
-		for eff in effs:
-			print 'Fake rate at signal eff', eff, fpr[np.argmax(tpr>eff)]
-			efficiency_res[-1].append(fpr[np.argmax(tpr>eff)])
-		print "break"
-		break
+			clf.fit(d_train, t_train, w_train)
 
-	# Can save with different features if necessary
-	print "Can save with different features if necessary"
-	if not path.exists('train'): makedirs('train')
-	joblib.dump(clf, 'train/{name}_clf.pkl'.format(name=clf.__class__.__name__), compress=9)
+			print 'Produce scores'
+			scores = clf.decision_function(d_test)
 
-	# if doCrossVal:
-	print 'Feature importances:'
-	print clf.feature_importances_
+			print 'Roc-curves'
+			fpr, tpr, tresholds = roc_curve(t_test, scores, sample_weight=w_test)
 
-	varList = rd.trainVars
-	for i, imp in enumerate(clf.feature_importances_):
-		print imp, varList[i] if i<len(varList) else 'N/A'
+			print 'dump'
+			joblib.dump((fpr, tpr, tresholds), 'roc_vals.pkl')
 
-	return TrainingResult(clf, efficiency_res)#(clf, efficiency_res)
+			effs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+			for eff in effs:
+				print 'Fake rate at signal eff', eff, fpr[np.argmax(tpr>eff)]
+				efficiency_res[-1].append(fpr[np.argmax(tpr>eff)])
+			print "break"
+			break
+
+		# Can save with different features if necessary
+		print "Can save with different features if necessary"
+		if not path.exists('train'): makedirs('train')
+		joblib.dump(clf, 'train/{name}_clf.pkl'.format(name=clf.__class__.__name__), compress=9)
+
+		# if doCrossVal:
+		print 'Feature importances:'
+		print clf.feature_importances_
+
+		varList = rd.trainVars
+		for i, imp in enumerate(clf.feature_importances_):
+			print imp, varList[i] if i<len(varList) else 'N/A'
+
+		return TrainingResult(clf, efficiency_res)#(clf, efficiency_res)
+
+	def readData(self, startS=None, stopS=None, startB=None, stopB=None):
+		self.training, self.weights, self.targets = rd.reads_data(startS, stopS, startB, stopB)
+
+	def getJobLib(self, name=None):
+		print 'Loading classifier'
+		if name is None : name = self.name
+
+		try:
+			return joblib.load('train/' + name + 'Classifier_clf.pkl')
+		except:
+			raise
+
+	def getTraining(self, name=None):
+		print 'Start training'
+		if name is None : name = self.name
+
+		if name == 'GradientBoosting':
+			return self.trainGBRT(self.training, self.targets, self.weights)
+		elif name == 'AdaBoost':
+			return self.trainAdaBoost(self.training, self.targets, self.weights)
+		elif name == 'RandomForest':
+			return self.trainRandomForest(self.training, self.targets, self.weights)
+		else:
+			print 'ERROR: no valid classifier', name
+			raise
+
+	def __str__(self):
+		return "Training:\n\name:" + name + " \n\tlength training: {}".format(len(self.training)) + " \n\tlength targets: {}".format(len(self.targets)) + " \n\tlength weights: {}".format(len(self.weights))
+
 
 if __name__ == '__main__':
-
-	classifier = 'GBRT' # 'Ada' #'GBRT'
 	doTrain = True
+	doTest = False
 
-	print 'Read training and test files...'
-	training, weights, targets = rd.reads_data(0, 10000, 0, 100000)
+	classifier = Training('GradientBoosting') # 'Ada' #'GBRT'
+	classifier.readData(0, 100, 0, 1000)
 
-	print 'Sizes'
-	print training.nbytes, weights.nbytes, targets.nbytes
-
-	if doTrain:
-		print 'Start training'
-
-		if classifier == 'GBRT':
-			clf = trainGBRT(training, targets, weights)
-		elif classifier == 'Ada':
-			clf = trainAdaBoost(training, targets, weights)
-		elif classifier == 'RF':
-			clf = trainRandomForest(training, targets, weights)
-		else:
-			print 'ERROR: no valid classifier', classifier
-
-	# if doTest:
-	#     print 'Loading classifier'
-	#     if classifier == 'GBRT':
-	#         clf = joblib.load('train/GradientBoostingClassifier_clf.pkl')
-	#     elif classifier == 'RF':
-	#         clf = joblib.load('train/RandomForestClassifier_clf.pkl')
-	#     elif classifier == 'Ada':
-	#         clf = joblib.load('train/AdaBoostClassifier_clf.pkl')
-	#     else:
-	#         print 'ERROR: no valid classifier', classifier
-
+	if doTrain: result = classifier.getTraining()
+	if doTest: clf = classifier.getJobLib()

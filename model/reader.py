@@ -16,7 +16,7 @@ class PlainReader(object):
 			filenameroot = 'data/reweightTreeTauIdMVA_mvaIsolation3HitsDeltaR05opt1aLTDB_photonPtSumOutsideSignalConePtGt0p5',
 			tree = 'reweightedTauIdMVATrainingNtuple'
 		):
-		print 'Reading files...'
+		print 'Read training and test files...'
 
 		# Read from files
 		sdata, sweights = klass._data_weights('_signal.root', startS, stopS, filenameroot, tree)
@@ -31,7 +31,7 @@ class PlainReader(object):
 		weights = np.concatenate((sweights, bweights))
 		weights = weights['evtWeight']
 
-		print "data.shape:", data.shape
+		# print "data.shape:", data.shape
 		return data, weights, klass._targets(sweights ,bweights)
 
 		
