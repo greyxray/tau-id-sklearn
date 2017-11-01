@@ -1,7 +1,6 @@
 ## Ad-hoc tau ID training with sklearn using ROOT trees as input
 # Requires root_numpy https://github.com/rootpy/root_numpy
 # Jan Steggemann 27 Aug 2015
-from os import path, makedirs
 import json
 import numpy as np
 
@@ -35,6 +34,11 @@ class Training(object):
 		self.training = training
 		self.weights = weights
 		self.targets = targets
+		self.algorithms = {
+			'GradientBoosting': self.trainGBRT,
+			'AdaBoost': self.trainAdaBoost,
+			'RandomForest': self.trainRandomForest
+		}
 
 	@classmethod
 	def trainRandomForest(klass, training_data, target, weights):
@@ -62,9 +66,10 @@ class Training(object):
 		print 'Sum weights signal', sumWeightsSignal
 		print 'Sum weights background', sumWeightsBackground
 
-		aveWeightSignal = sumWeightsSignal/np.sum(target)
+		aveWeightSignal = sumWeightsSignal / np.sum(target)
 		print 'Average weight signal', aveWeightSignal
-		aveWeightBG = sumWeightsSignal/np.sum(1-target)
+
+		aveWeightBG = sumWeightsSignal / np.sum(1 - target)
 		print 'Average weight background', aveWeightBG
 
 		nCrossVal = 2
@@ -109,7 +114,6 @@ class Training(object):
 
 		# Can save with different features if necessary
 		print "Can save with different features if necessary"
-		if not path.exists('train'): makedirs('train')
 		joblib.dump(clf, 'train/{name}_clf.pkl'.format(name=clf.__class__.__name__), compress=9)
 
 		# if doCrossVal:
@@ -127,37 +131,24 @@ class Training(object):
 
 	def getJobLib(self, name=None):
 		print 'Loading classifier'
-		if name is None : name = self.name
+		if name is None: 
+			name = self.name
 
-		try:
-			return joblib.load('train/' + name + 'Classifier_clf.pkl')
-		except:
-			raise
+		return joblib.load('train/' + name + 'Classifier_clf.pkl')
 
 	def getTraining(self, name=None):
 		print 'Start training'
-		if name is None : name = self.name
+		if name is None: 
+			name = self.name
 
-		if name == 'GradientBoosting':
-			return self.trainGBRT(self.training, self.targets, self.weights)
-		elif name == 'AdaBoost':
-			return self.trainAdaBoost(self.training, self.targets, self.weights)
-		elif name == 'RandomForest':
-			return self.trainRandomForest(self.training, self.targets, self.weights)
-		else:
-			print 'ERROR: no valid classifier', name
-			raise
+		algorithm = self.algorithms.get(name)
+
+		if not algorithm:
+			raise KeyError("getTraining: No such algorithm " + name)
+
+		return algorithm(self.training, self.targets, self.weights)
+
 
 	def __str__(self):
 		return "Training:\n\name:" + name + " \n\tlength training: {}".format(len(self.training)) + " \n\tlength targets: {}".format(len(self.targets)) + " \n\tlength weights: {}".format(len(self.weights))
 
-
-if __name__ == '__main__':
-	doTrain = True
-	doTest = False
-
-	classifier = Training('GradientBoosting') # 'Ada' #'GBRT'
-	classifier.readData(0, 100, 0, 1000)
-
-	if doTrain: result = classifier.getTraining()
-	if doTest: clf = classifier.getJobLib()
